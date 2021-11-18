@@ -1,0 +1,228 @@
+#+TITLE: Hlynur's Doom-ed Mega Config
+#+AUTHOR: Hlynur Magnússon
+#+DESCRIPTION: My Personal Doom Config file that I will try to keep for multiple computers. 
+# #+STARTUP: showeverything
+
+* TABLE OF CONTENTS :toc:
+- [[#general-settings---built-in-emacs-thingies][General Settings - Built in Emacs thingies]]
+  - [[#dont-show-startup-message][Dont show startup message]]
+  - [[#dont-show-toolbar][Don't show toolbar]]
+  - [[#dont-show-menu][Don't show menu]]
+  - [[#dont-show-scrollbar][Don't show scrollbar]]
+  - [[#highlight-line][Highlight line]]
+  - [[#delete-selection][Delete Selection]]
+  - [[#display-line-numbers-when-programming][Display line numbers when programming]]
+  - [[#show-matching-parenthesis][Show matching parenthesis]]
+- [[#ui][UI]]
+  - [[#theme][Theme]]
+  - [[#font][Font]]
+  - [[#icons][Icons]]
+  - [[#modeline][Modeline]]
+  - [[#after-split---ask-what-window-to-use][After Split - Ask what window to use]]
+  - [[#allow-emacs-to-remember-its-window-size-on-exit][Allow Emacs to remember it's window size on exit.]]
+- [[#modes][Modes]]
+- [[#general-packages][General Packages]]
+  - [[#treemacs][Treemacs]]
+- [[#custom-functions][Custom Functions]]
+- [[#javascript-settings][JavaScript settings]]
+  - [[#rjsx-mode---react-packages][RJSX mode - React packages]]
+  - [[#tide][Tide]]
+  - [[#prettier][Prettier]]
+  - [[#stuff][Stuff]]
+
+* General Settings - Built in Emacs thingies
+
+# ** Dont show startup message
+# #+BEGIN_SRC emacs-lisp
+# (setq inhibit-startup-message t)
+# #+END_SRC
+
+# ** Don't show toolbar 
+# #+BEGIN_SRC emacs-lisp
+# (tool-bar-mode -1)
+# #+END_SRC
+
+# ** Don't show menu 
+# #+BEGIN_SRC emacs-lisp
+# (menu-bar-mode -1)
+# #+END_SRC
+
+# ** Don't show scrollbar 
+# #+BEGIN_SRC emacs-lisp
+# (scroll-bar-menu -1)
+# #+END_SRC
+
+# ** Highlight line 
+# #+BEGIN_SRC emacs-lisp
+# (global-hl-line-mode +1)
+# #+END_SRC
+
+# ** Delete Selection 
+# #+BEGIN_SRC emacs-lisp
+# (delete-selection-mode 1)
+# #+END_SRC
+
+# ** Display line numbers when programming 
+# #+BEGIN_SRC emacs-lisp
+# (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+# #+END_SRC
+
+# ** Show matching parenthesis 
+# #+BEGIN_SRC emacs-lisp
+# (show-paren-mode 1)
+# #+END_SRC
+
+
+* UI
+
+** Theme
+#+BEGIN_SRC emacs-lisp
+(setq doom-theme 'doom-horizon)
+(map! :leader
+      :desc "Load a new theme"
+      "h t" #'councel-load-theme)
+#+END_SRC
+
+** Font
+Settings for fonts in Doom Emacs:
++ 'doom-font' -- standard monospace font that is used for most things in Emacs.
++ 'doom-variable-pitch-font' -- variable font which is useful in some Emacs plugins.
++ 'doom-big-font' -- used in doom-big-font-mode; useful for presentations.
++ 'font-lock-comment-face' -- for comments.
++ 'font-lock-keyword-face' -- for keywords with special significance, like ‘for’ and ‘if’ in C.
+  
+#+BEGIN_SRC emacs-lisp
+(setq doom-font                 (font-spec :family "Source Code Pro" :size 14)
+      doom-variable-pitch-font  (font-spec :family "Source Code Pro" :size 15)
+      doom-unicode-font         (font-spec :family "Source Code Pro" :size 14)
+      doom-big-font             (font-spec :family "Source Code Pro" :size 24)
+      )
+(after! doom-themes
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t))
+(custom-set-faces!
+  '(font-lock-comment-face      :slant italic)
+  '(font-lock-keyword-face      :slant italic))
+#+END_SRC
+
+# ** Icons
+# #+BEGIN_SRC emacs-lisp
+# (use-package all-the-icons
+#   :ensure t)
+# #+END_SRC
+
+# ** Modeline
+# #+BEGIN_SRC emacs-lisp
+# (use-package doom-modeline
+#   :ensure t
+#   :hook (after-init . doom-modeline-mode))
+# #+END_SRC
+
+** After Split - Ask what window to use
+#+BEGIN_SRC emacs-lisp
+(setq evil-vsplit-window-right t
+      evil-split-window-below t)
+
+(defadvice! prompt-for-buffer (&rest _)
+  :after '(evil-window-split evil-window-vsplit)
+  (+ivy/switch-buffer))
+
+(setq +ivy-buffer-preview t)
+#+END_SRC
+
+** Allow Emacs to remember it's window size on exit.
++ Window Size
++ Fullscreen mode
+  #+BEGIN_SRC emacs-lisp
+(when-let (dims (doom-store-get 'last-frame-size))
+  (cl-destructuring-bind ((left . top) width height fullscreen) dims
+    (setq initial-frame-alist
+          (append initial-frame-alist
+                  `((left . ,left)
+                    (top . ,top)
+                    (width . ,width)
+                    (height . ,height)
+                    (fullscreen . ,fullscreen))))))
+
+(defun save-frame-dimensions ()
+  (doom-store-put 'last-frame-size
+                  (list (frame-position)
+                        (frame-width)
+                        (frame-height)
+                        (frame-parameter nil 'fullscreen))))
+
+(add-hook 'kill-emacs-hook #'save-frame-dimensions)
+#+END_SRC
+
+
+* Modes
+
+* General Packages
+
+# ** Treemacs
+# #+BEGIN_SRC emacs-lisp
+# (use-package treemacs
+#   :ensure t
+#   :bind
+#   (:map global-map
+#    ([f8] . treemacs)
+#    ("C-<f8>" . treemacs-select-window))
+#   :config
+#   (setq treemacs-is-never-other-window t))
+# #+END_SRC
+
+# *** Treemacs Projectile
+# #+BEGIN_SRC emacs-lisp
+# (use-package treemacs-projectile
+#   :after treemacs projectile
+#   :ensure t)
+# #+END_SRC
+
+* Custom Functions 
+
+* JavaScript settings
+
+** RJSX mode - React packages
+#+BEGIN_SRC emacs-lisp
+(use-package rjsx-mode
+  :ensure t
+  :mode "\\.js\\'")
+#+END_SRC
+
+** Tide
+#+BEGIN_SRC emacs-lisp
+(defun setup-tide-mode()
+  "Setup function for tide."
+  (interactive)
+  (tide-setup)
+  (flyckeck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  (company-mode +1))
+
+(setq company-tooltip-align-annotations t)
+
+(add-hook 'js-mode-hook #'setup-tide-mode)
+
+(use-package tide
+  :ensure t
+  :after (rjsx-mode company flycheck)
+  :hook (rjsx-mode . setup-tide-mode))
+#+END_SRC
+
+#+RESULTS:
+| setup-tide-mode | (closure (t) (&rest _) (setq flycheck-disabled-checkers (cons 'javascript-jshint flycheck-disabled-checkers))) | +electric--init-rjsx-mode-h | +lookup--init-rjsx-mode-handlers-h | js2-refactor-mode |
+
+** Prettier
+#+BEGIN_SRC emacs-lisp
+(use-package prettier-js
+  :ensure t
+  :after (rjsx-mode)
+  :hook (rjsx-mode . prettier-js-mode))
+#+END_SRC
+
+** Stuff
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
